@@ -50,7 +50,7 @@ class PageRankPregelAlgoTest {
     void runPR() {
         int maxIterations = 30;
 
-        var config = ImmutablePageRankPregelConfig.builder()
+        var config = ImmutableOpenRankPregelConfig.builder()
             .maxIterations(maxIterations)
             .isAsynchronous(false)
             .initValueProperty("initValue")

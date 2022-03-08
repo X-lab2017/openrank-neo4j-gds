@@ -26,7 +26,7 @@ import java.util.function.LongPredicate;
     modes = {GDSMode.STREAM, GDSMode.WRITE},
     description = "X-lab OpenRank in Pregel implementation"
 )
-public class OpenRankPregel implements PregelComputation<OpenRankPregel.PageRankPregelConfig> {
+public class OpenRankPregel implements PregelComputation<OpenRankPregel.OpenRankPregelConfig> {
 
     private String openRank = "open_rank";
     static String initValue = "init_value";
@@ -42,7 +42,7 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.PageRank
     }
 
     @Override
-    public PregelSchema schema(PageRankPregelConfig config) {
+    public PregelSchema schema(OpenRankPregelConfig config) {
         this.tolerance = config.tolerance();
         this.enableLog = config.enableLog();
         this.openRank += config.suffix();
@@ -55,7 +55,7 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.PageRank
     }
 
     @Override
-    public void init(InitContext<PageRankPregelConfig> context) {
+    public void init(InitContext<OpenRankPregelConfig> context) {
         if (context.nodePropertyKeys().contains(context.config().initValueProperty())) {
             double initValueDouble = context.nodeProperties(context.config().initValueProperty()).doubleValue(context.nodeId());
             context.setNodeValue(initValue, initValueDouble);
@@ -75,7 +75,7 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.PageRank
     }
 
     @Override
-    public void compute(ComputeContext<PageRankPregelConfig> context, Messages messages) {
+    public void compute(ComputeContext<OpenRankPregelConfig> context, Messages messages) {
         var initValueDouble = context.doubleNodeValue(initValue);
         var oldRank = context.doubleNodeValue(openRank);
 
@@ -98,7 +98,7 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.PageRank
     }
 
     @Override
-    public boolean masterCompute(MasterComputeContext<OpenRankPregel.PageRankPregelConfig> context) {
+    public boolean masterCompute(MasterComputeContext<OpenRankPregelConfig> context) {
         final var stop = new Boolean[]{true};
         context.forEachNode(new LongPredicate() {
             @Override
@@ -127,9 +127,9 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.PageRank
     }
 
     @ValueClass
-    @Configuration("PageRankPregelConfigImpl")
+    @Configuration("OpenRankPregelConfigImpl")
     @SuppressWarnings("immutables:subtype")
-    public interface PageRankPregelConfig extends PregelProcedureConfig {
+    public interface OpenRankPregelConfig extends PregelProcedureConfig {
         @Value.Default
         default String retentionFactorProperty() {
             return "RETENTION_FACTOR";
@@ -155,13 +155,13 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.PageRank
             return "";
         }
 
-        static PageRankPregelConfig of(
+        static OpenRankPregelConfig of(
             String username,
             Optional<String> graphName,
             Optional<GraphCreateConfig> maybeImplicitCreate,
             CypherMapWrapper userInput
         ) {
-            return new PageRankPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+            return new OpenRankPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
         }
     }
 }

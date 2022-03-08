@@ -1,0 +1,92 @@
+plugins {
+    // Apply the java plugin to add support for Java
+    id 'java'
+    // Used for building a standalone jar
+    id 'com.github.johnrengelman.shadow' version '4.0.4'
+}
+
+ext {
+    // Make sure these are the same as your installation of GDS and Neo4j
+    gdsVersion = '1.7.3'
+    neo4jVersion = '4.3.10'
+
+    // Necessary to generate value classes for Pregel configs
+    immutablesVersion = '2.8.1'
+
+    // Necessary compile-time dependency for code generation
+    jetbrainsAnnotations = '18.0.0'
+
+    // Test dependency versions
+    junit5Version = '5.7.1'
+}
+
+description = 'Graph Data Science :: Pregel Bootstrap'
+
+group = 'xlab.gds'
+
+dependencies {
+    // We depend on the proc artifact of the GDS library
+    compileOnly "org.neo4j.gds:proc:$gdsVersion"
+    compileOnly "org.neo4j.gds:core:$gdsVersion"
+    compileOnly "org.neo4j.gds:annotations:$gdsVersion"
+    compileOnly "org.neo4j.gds:proc-pregel:$gdsVersion"
+
+    // We also need to depend on Neo4j itself for our tests.
+    // Usually, Neo4j is available when we are running as a plugin.
+    compileOnly "org.neo4j:neo4j:$neo4jVersion"
+
+    // We need an annotation processor for our K1 configuration
+    annotationProcessor "org.immutables:value:$immutablesVersion"
+    annotationProcessor "org.neo4j.gds:config-generator:$gdsVersion"
+    annotationProcessor "org.neo4j.gds:pregel-proc-generator:$gdsVersion"
+    compileOnly         "org.jetbrains:annotations:$jetbrainsAnnotations"
+    compileOnly         "org.immutables:value-annotations:$immutablesVersion"
+
+    // We need an annotation processor for our test configurations
+    testAnnotationProcessor "org.neo4j.gds:config-generator:$gdsVersion"
+
+    // We need to provide GDS for the test as well, along with some test helpers
+    testImplementation "org.neo4j.gds:test-utils:$gdsVersion"
+    testImplementation "org.neo4j.gds:proc:$gdsVersion"
+    testImplementation "org.neo4j.gds:core:$gdsVersion"
+    testImplementation "org.neo4j.gds:proc-pregel:$gdsVersion"
+
+    // Use JUnit Jupiter API for testing.
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit5Version"
+
+    // Use JUnit Jupiter Engine for testing.
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit5Version"
+}
+
+test {
+    // Use junit platform for unit tests
+    useJUnitPlatform()
+}
+
+// This task produces a single jar.
+// The jar must be copied into the Neo4j plugin
+// directory in order to use the custom procedure.
+shadowJar {
+    exclude 'META-INF/versions/**/*'
+}
+
+sourceSets {
+    main{
+        java {
+            srcDirs('build/generated/sources/annotationProcessor/java/main')
+        }
+    }
+}
+
+repositories {
+    // Use jcenter for resolving dependencies.
+    // You can declare any Maven/Ivy/file repository here.
+    jcenter()
+    mavenLocal()
+
+    // Used for internal CI support for that module.
+    // Can be removed in custom projects.
+    maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
+
+    maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
+}

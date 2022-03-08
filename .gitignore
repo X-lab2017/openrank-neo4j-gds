@@ -1,0 +1,5 @@
+.gradle
+.vscode
+.jqwik-database
+bin
+build

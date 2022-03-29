@@ -31,7 +31,7 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.OpenRank
     private String openRank = "open_rank";
     static String initValue = "init_value";
     static String rententionFactor = "retention_factor";
-    static String voteToHalt = "vote_to_halt";
+    static String converged = "converged";
     private boolean enableLog;
     private double tolerance;
 
@@ -50,7 +50,7 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.OpenRank
             .add(openRank, ValueType.DOUBLE)
             .add(initValue, ValueType.DOUBLE)
             .add(rententionFactor, ValueType.DOUBLE)
-            .add(voteToHalt, ValueType.LONG)
+            .add(converged, ValueType.LONG)
             .build();
     }
 
@@ -69,9 +69,9 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.OpenRank
             double retentionFactor = context.nodeProperties(context.config().retentionFactorProperty()).doubleValue(context.nodeId());
             context.setNodeValue(rententionFactor, retentionFactor);
         } else {
-            context.setNodeValue(rententionFactor, 0.85);
+            context.setNodeValue(rententionFactor, 0.15);
         }
-        context.setNodeValue(voteToHalt, 0l);
+        context.setNodeValue(converged, 0l);
     }
 
     @Override
@@ -90,30 +90,30 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.OpenRank
 
             context.setNodeValue(openRank, newRank);
             if (Math.abs(newRank - oldRank) < this.tolerance) {
-                context.setNodeValue(voteToHalt, 1l);
+                context.setNodeValue(converged, 1l);
             }
-
-            context.sendToNeighbors(newRank);           
         }
+
+        context.sendToNeighbors(context.doubleNodeValue(openRank));
     }
 
     @Override
     public boolean masterCompute(MasterComputeContext<OpenRankPregelConfig> context) {
-        final var stop = new Boolean[]{true};
+        var result = new ConvergeResult();
         context.forEachNode(new LongPredicate() {
             @Override
             public boolean test(long id) {
-                if (context.longNodeValue(id, voteToHalt) == 0l) {
-                    stop[0] = false;
+                if (context.longNodeValue(id, converged) == 0l) {
+                    result.isConverged = false;
                     return true;
                 }
                 return false;
             }
         });
-        if (stop[0] == true) {
-            log("The process stopped at iteration %d", context.superstep());
+        if (result.isConverged) {
+            log("The process converged at iteration %d", context.superstep());
         }
-        return stop[0];
+        return result.isConverged;
     }
 
     @Override
@@ -162,6 +162,14 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.OpenRank
             CypherMapWrapper userInput
         ) {
             return new OpenRankPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        }
+    }
+
+    private class ConvergeResult {
+        public boolean isConverged;
+
+        public ConvergeResult() {
+            isConverged = true;
         }
     }
 }

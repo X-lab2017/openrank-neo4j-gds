@@ -11,6 +11,7 @@ import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.beta.pregel.Reducer;
+import org.neo4j.gds.beta.pregel.PregelSchema.Visibility;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
@@ -48,9 +49,9 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.OpenRank
         this.openRank += config.suffix();
         return new PregelSchema.Builder()
             .add(openRank, ValueType.DOUBLE)
-            .add(initValue, ValueType.DOUBLE)
-            .add(rententionFactor, ValueType.DOUBLE)
-            .add(converged, ValueType.LONG)
+            .add(initValue, ValueType.DOUBLE, Visibility.PRIVATE)
+            .add(rententionFactor, ValueType.DOUBLE, Visibility.PRIVATE)
+            .add(converged, ValueType.LONG, Visibility.PRIVATE)
             .build();
     }
 

@@ -28,10 +28,10 @@ import java.util.function.LongPredicate;
 )
 public class OpenRankPregel implements PregelComputation<OpenRankPregel.OpenRankPregelConfig> {
 
-    private String openRank = "open_rank";
-    static String initValue = "init_value";
-    static String rententionFactor = "retention_factor";
-    static String converged = "converged";
+    private String OPEN_RANK = "open_rank";
+    static String INIT_VALUE = "init_value";
+    static String RENTENTION_FACTOR = "retention_factor";
+    static String CONVERGED = "converged";
     private boolean enableLog;
     private double tolerance;
 
@@ -45,12 +45,12 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.OpenRank
     public PregelSchema schema(OpenRankPregelConfig config) {
         this.tolerance = config.tolerance();
         this.enableLog = config.enableLog();
-        this.openRank += config.suffix();
+        this.OPEN_RANK += config.suffix();
         return new PregelSchema.Builder()
-            .add(openRank, ValueType.DOUBLE)
-            .add(initValue, ValueType.DOUBLE, Visibility.PRIVATE)
-            .add(rententionFactor, ValueType.DOUBLE, Visibility.PRIVATE)
-            .add(converged, ValueType.LONG, Visibility.PRIVATE)
+            .add(OPEN_RANK, ValueType.DOUBLE)
+            .add(INIT_VALUE, ValueType.DOUBLE, Visibility.PRIVATE)
+            .add(RENTENTION_FACTOR, ValueType.DOUBLE, Visibility.PRIVATE)
+            .add(CONVERGED, ValueType.LONG, Visibility.PRIVATE)
             .build();
     }
 
@@ -58,43 +58,43 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.OpenRank
     public void init(InitContext<OpenRankPregelConfig> context) {
         if (context.nodePropertyKeys().contains(context.config().initValueProperty())) {
             double initValueDouble = context.nodeProperties(context.config().initValueProperty()).doubleValue(context.nodeId());
-            context.setNodeValue(initValue, initValueDouble);
-            context.setNodeValue(openRank, initValueDouble);
+            context.setNodeValue(INIT_VALUE, initValueDouble);
+            context.setNodeValue(OPEN_RANK, initValueDouble);
         } else {
-            context.setNodeValue(initValue, 1d);
-            context.setNodeValue(openRank, 1d);
+            context.setNodeValue(INIT_VALUE, 1d);
+            context.setNodeValue(OPEN_RANK, 1d);
         }
 
         if (context.nodePropertyKeys().contains(context.config().retentionFactorProperty())) {
             double retentionFactor = context.nodeProperties(context.config().retentionFactorProperty()).doubleValue(context.nodeId());
-            context.setNodeValue(rententionFactor, retentionFactor);
+            context.setNodeValue(RENTENTION_FACTOR, retentionFactor);
         } else {
-            context.setNodeValue(rententionFactor, 0.15);
+            context.setNodeValue(RENTENTION_FACTOR, 0.15);
         }
-        context.setNodeValue(converged, 0l);
+        context.setNodeValue(CONVERGED, 0l);
     }
 
     @Override
     public void compute(ComputeContext<OpenRankPregelConfig> context, Messages messages) {
-        var initValueDouble = context.doubleNodeValue(initValue);
-        var oldRank = context.doubleNodeValue(openRank);
+        var initValueDouble = context.doubleNodeValue(INIT_VALUE);
+        var oldRank = context.doubleNodeValue(OPEN_RANK);
         // skip calculation for converged nodes
-        if (!context.isInitialSuperstep() && context.longNodeValue(converged) == 0l) {
+        if (!context.isInitialSuperstep() && context.longNodeValue(CONVERGED) == 0l) {
             var sum = 0d;
             for (var message : messages) {
                 sum += message;
             }
 
-            var retentionFactor = context.doubleNodeValue(rententionFactor);
+            var retentionFactor = context.doubleNodeValue(RENTENTION_FACTOR);
             var newRank = retentionFactor * initValueDouble + (1 - retentionFactor) * sum;
 
             // set new value and convergence state
-            context.setNodeValue(openRank, newRank);
+            context.setNodeValue(OPEN_RANK, newRank);
             if (Math.abs(newRank - oldRank) < this.tolerance) {
-                context.setNodeValue(converged, 1l);
+                context.setNodeValue(CONVERGED, 1l);
             }
         }
-        context.sendToNeighbors(context.doubleNodeValue(openRank));
+        context.sendToNeighbors(context.doubleNodeValue(OPEN_RANK));
     }
 
     @Override
@@ -103,7 +103,7 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.OpenRank
         context.forEachNode(new LongPredicate() {
             @Override
             public boolean test(long id) {
-                if (context.longNodeValue(id, converged) == 0l) {
+                if (context.longNodeValue(id, CONVERGED) == 0l) {
                     result.isConverged = false;
                     return true;
                 }

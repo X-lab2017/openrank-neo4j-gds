@@ -4,7 +4,6 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
-
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.PregelComputation;
@@ -79,8 +78,8 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.OpenRank
     public void compute(ComputeContext<OpenRankPregelConfig> context, Messages messages) {
         var initValueDouble = context.doubleNodeValue(initValue);
         var oldRank = context.doubleNodeValue(openRank);
-
-        if (!context.isInitialSuperstep()) {
+        // skip calculation for converged nodes
+        if (!context.isInitialSuperstep() && context.longNodeValue(converged) == 0l) {
             var sum = 0d;
             for (var message : messages) {
                 sum += message;
@@ -89,12 +88,12 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.OpenRank
             var retentionFactor = context.doubleNodeValue(rententionFactor);
             var newRank = retentionFactor * initValueDouble + (1 - retentionFactor) * sum;
 
+            // set new value and convergence state
             context.setNodeValue(openRank, newRank);
             if (Math.abs(newRank - oldRank) < this.tolerance) {
                 context.setNodeValue(converged, 1l);
             }
         }
-
         context.sendToNeighbors(context.doubleNodeValue(openRank));
     }
 

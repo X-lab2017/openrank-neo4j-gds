@@ -10,7 +10,7 @@ Run `gradle test` to run unit tests and `gradle build` to build the project, you
 
 ## Compatibility
 
-This plugin uses [Neo4j Community Edition 4.3.10](https://neo4j.com/download-center/#community) and [Neo4j GDS(Graph Data Science) 1.7.3](https://github.com/neo4j/graph-data-science/releases/tag/1.7.3), feel free to build your own plugin to change the versions under [`build.gradle`](./build.gradle).
+This plugin uses [Neo4j Community Edition 4.3.10](https://neo4j.com/download-center/#community) and [Neo4j GDS(Graph Data Science) 2.1.6](https://github.com/neo4j/graph-data-science/releases/tag/2.1.6), feel free to build your own plugin to change the versions under [`build.gradle`](./build.gradle).
 
 ## Usage
 

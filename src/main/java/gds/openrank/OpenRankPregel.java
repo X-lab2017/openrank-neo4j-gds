@@ -16,7 +16,6 @@ import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
-import org.neo4j.gds.config.GraphCreateConfig;
 
 import java.util.Optional;
 import java.util.function.LongPredicate;
@@ -155,13 +154,8 @@ public class OpenRankPregel implements PregelComputation<OpenRankPregel.OpenRank
             return "";
         }
 
-        static OpenRankPregelConfig of(
-            String username,
-            Optional<String> graphName,
-            Optional<GraphCreateConfig> maybeImplicitCreate,
-            CypherMapWrapper userInput
-        ) {
-            return new OpenRankPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        static OpenRankPregelConfig of(CypherMapWrapper userInput) {
+            return new OpenRankPregelConfigImpl(userInput);
         }
     }
 

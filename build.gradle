@@ -2,13 +2,13 @@ plugins {
     // Apply the java plugin to add support for Java
     id 'java'
     // Used for building a standalone jar
-    id 'com.github.johnrengelman.shadow' version '4.0.4'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 ext {
     // Make sure these are the same as your installation of GDS and Neo4j
-    gdsVersion = '2.1.6'
-    neo4jVersion = '4.3.10'
+    gdsVersion = '2.3.3'
+    neo4jVersion = '5.6.0'
 
     // Necessary to generate value classes for Pregel configs
     immutablesVersion = '2.8.1'
@@ -66,6 +66,16 @@ dependencies {
 test {
     // Use junit platform for unit tests
     useJUnitPlatform()
+
+    // Since JDK 17 the default access to the following
+    // packages is "deny". We need to open them in order
+    // to gain access in GDS / Neo4j.
+    jvmArgs += '--add-opens=java.base/java.lang=ALL-UNNAMED'
+    jvmArgs += '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED'
+    jvmArgs += '--add-opens=java.base/java.nio=ALL-UNNAMED'
+    jvmArgs += '--add-opens=java.base/java.util.stream=ALL-UNNAMED'
+    jvmArgs += '--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED'
+    jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED'
 }
 
 // This task produces a single jar.
@@ -75,18 +85,10 @@ shadowJar {
     exclude 'META-INF/versions/**/*'
 }
 
-sourceSets {
-    main{
-        java {
-            srcDirs('build/generated/sources/annotationProcessor/java/main')
-        }
-    }
-}
-
 repositories {
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
-    jcenter()
+    mavenCentral()
     mavenLocal()
 
     // Used for internal CI support for that module.

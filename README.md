@@ -4,13 +4,13 @@ This repository is an OpenRank Neo4j plugin implementation with Neo4j GDS librar
 
 ## Build & Test
 
-You may use [Gradle](https://gradle.org/) 7 to build and test the project.
+You may use [Gradle](https://gradle.org/) 8 to build and test the project.
 
-Run `gradle test` to run unit tests and `gradle build` to build the project, you will find the `openrank-neo4j-gds.jar` after build under `./build/libs`.
+Run `gradle test` to run unit tests and `./gradlew clean build` to build the project, you will find the `openrank-neo4j-gds.jar` after build under `./build/libs`.
 
 ## Compatibility
 
-This plugin uses [Neo4j Community Edition 4.3.10](https://neo4j.com/download-center/#community) and [Neo4j GDS(Graph Data Science) 2.1.6](https://github.com/neo4j/graph-data-science/releases/tag/2.1.6), feel free to build your own plugin to change the versions under [`build.gradle`](./build.gradle).
+This plugin uses [Neo4j Community Edition 5.6.0](https://neo4j.com/download-center/#community) and [Neo4j GDS(Graph Data Science) 2.3.3](https://github.com/neo4j/graph-data-science/releases/tag/2.3.3), feel free to build your own plugin to change the versions under [`build.gradle`](./build.gradle).
 
 ## Usage
 
